@@ -30,7 +30,7 @@ export function SummaryCard({
             </CardHeader>
 
             <CardContent>
-                <p className="text-3xl font-bold">
+                <p className="text-3xl font-bold gap-2">
                     {value}
                 </p>
             </CardContent>
