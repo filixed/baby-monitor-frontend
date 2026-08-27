@@ -2,8 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { timelineEvents } from "../mockData";
 import { TimelineItem } from "./TimeLineItem";
+import type {Feeding} from "@/feauters/feeding/types.ts";
 
-export function TodayTimeline() {
+interface TodayTimelineProps {
+    feedings: Feeding[];
+}
+
+export function TodayTimeline({feedings}: TodayTimelineProps) {
     return (
         <Card>
             <CardHeader>
@@ -16,6 +21,24 @@ export function TodayTimeline() {
                         <TimelineItem
                             key={event.id}
                             event={event}
+                        />
+                    ))}
+
+                    {feedings.map((feeding) => (
+                        <TimelineItem
+                            key={feeding.id}
+                            event={{
+                                id: feeding.id,
+                                type: "feeding",
+                                timestamp: new Date(
+                                    feeding.timestamp
+                                ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                }),
+                                title: "Feeding",
+                                description: `Bottle · ${feeding.amountMl} ml`,
+                            }}
                         />
                     ))}
                 </div>
