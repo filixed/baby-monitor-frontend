@@ -9,6 +9,11 @@ interface TodayTimelineProps {
 }
 
 export function TodayTimeline({feedings}: TodayTimelineProps) {
+    
+    const events = [
+            ...timelineEvents,
+            ...feedings,
+    ]
     return (
         <Card>
             <CardHeader>
@@ -17,14 +22,8 @@ export function TodayTimeline({feedings}: TodayTimelineProps) {
 
             <CardContent>
                 <div>
-                    {timelineEvents.map((event) => (
-                        <TimelineItem
-                            key={event.id}
-                            event={event}
-                        />
-                    ))}
-
-                    {feedings.map((feeding) => (
+                    
+                    {events.map((feeding) => (
                         <TimelineItem
                             key={feeding.id}
                             event={{

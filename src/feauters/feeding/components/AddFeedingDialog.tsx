@@ -30,7 +30,7 @@ export function AddFeedingDialog({
                     </DialogTitle>
                 </DialogHeader>
 
-                <FeedingForm onSubmit={onSubmit} />
+                <FeedingForm onSubmitFeeding={onSubmit} />
             </DialogContent>
         </Dialog>
     );
