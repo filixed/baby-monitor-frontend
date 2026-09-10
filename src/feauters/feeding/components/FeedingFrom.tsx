@@ -15,8 +15,13 @@ type FeedingFormData = z.infer<typeof feedingFormSchema>;
 
 export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
     const today = new Date();
-    
-    const form = useForm<FeedingFormData>({
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+    } = useForm<FeedingFormData>({
         resolver: zodResolver(feedingFormSchema),
         defaultValues: {
             type: "bottle",
@@ -26,19 +31,23 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
         }
     });
     
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = form;
+    const feedingType = watch("type")
 
     const onSubmit = (data: FeedingFormData)=> {
         const feeding: Feeding = {
             id: crypto.randomUUID(),
             type: data.type,
-            amountMl: data.amountMl,
             timestamp: `${data.date}T${data.time}:00`,
         };
+        
+        if(data.type === "bottle") {
+            feeding.amountMl = data.amountMl;
+        }
+        
+        if(data.type === "breast") {
+            feeding.side = data.side;
+            feeding.durationMinutes = data.durationMinutes;
+        }
 
         onSubmitFeeding(feeding);
     }
@@ -73,25 +82,80 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
                     </p>
                 )}
             </div>
-            
-            <div className="flex flex-col gap-2">
-                <Label htmlFor="amountMl">
-                    Amount (ml)
-                </Label>
 
-                <Input
-                    id="amountMl"
-                    type="number"
-                    {...register("amountMl", {
-                        valueAsNumber: true,
-                    })}
-                />
-                {errors.amountMl && (
-                    <p className="text-sm text-destructive">
-                        {errors.amountMl.message}
-                    </p>
-                )}
-            </div>
+            {feedingType === "bottle" && (
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="amountMl">
+                        Amount (ml)
+                    </Label>
+
+                    <Input
+                        id="amountMl"
+                        type="number"
+                        {...register("amountMl", {
+                            setValueAs: (value) =>
+                                value === "" ? undefined : Number(value)
+                        })}
+                    />
+                    {"amountMl" in errors && errors.amountMl && (
+                        <p className="text-sm text-destructive">
+                            {errors.amountMl.message}
+                        </p>
+                    )}
+                </div>    
+            )}
+
+            {feedingType === "breast" && (
+                <>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="side">
+                            Side
+                        </Label>
+
+                        <select
+                            id="side"
+                            {...register("side")}
+                            className="border rounded-md p-2"
+                        >
+                            <option value="left">
+                                Left
+                            </option>
+
+                            <option value="right">
+                                Right
+                            </option>
+                        </select>
+
+                        {"side" in errors && errors.side && (
+                            <p className="text-sm text-destructive">
+                                {errors.side.message}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="durationMinutes">
+                            Duration (minutes)
+                        </Label>
+
+                        <Input
+                            id="durationMinutes"
+                            type="number"
+                            {...register("durationMinutes", {
+                                valueAsNumber: true,
+                            })}
+                        />
+
+                        {"durationMinutes" in errors && errors.durationMinutes && (
+                            <p className="text-sm text-destructive">
+                                {errors.durationMinutes.message}
+                            </p>
+                        )}
+                    </div>
+                </>
+            )}
+            
+            
 
             <div className="flex flex-col gap-2">
                 <Label htmlFor="date">
