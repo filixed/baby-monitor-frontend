@@ -1,19 +1,57 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { timelineEvents } from "../mockData";
 import { TimelineItem } from "./TimeLineItem";
-import type {Feeding} from "@/feauters/feeding/types.ts";
+import {useFeedingStore} from "@/feauters/feeding/store.ts";
+import type {TimeLineEvent} from "@/feauters/dashboard/types.ts";
+import {useDiaperStore} from "@/feauters/diaper/store.ts";
 
-interface TodayTimelineProps {
-    feedings: Feeding[];
-}
 
-export function TodayTimeline({feedings}: TodayTimelineProps) {
-    
-    const events = [
-            ...timelineEvents,
-            ...feedings,
-    ]
+export function TodayTimeline() {
+
+    const feedings = useFeedingStore((state) => state.feedings);
+
+    const feedingEvents: TimeLineEvent[] = feedings.map((feeding) => {
+        if (feeding.type === "bottle") {
+            return {
+                id: feeding.id,
+                type: "feeding",
+                timestamp: feeding.timestamp,
+                title: "Bottle feeding",
+                description: `${feeding.amountMl} ml`,
+            };
+        }
+
+        return {
+            id: feeding.id,
+            type: "feeding",
+            timestamp: feeding.timestamp,
+            title: "Breastfeeding",
+            description: `${feeding.side === "left" ? "Left" : "Right"} side · ${feeding.durationMinutes} min`,
+        };
+    });
+
+    const diapers = useDiaperStore((state) => state.diapers)
+
+    const diapersEvents: TimeLineEvent[] = diapers.map((diaper) => {
+        return {
+            id: diaper.id,
+            type: "diaper",
+            timestamp: diaper.timestamp,
+            title: "Diaper change",
+            description: diaper.description ?? "",
+        };
+    });
+
+    const allEvents = [
+        ...feedingEvents,
+        ...diapersEvents];
+
+    const sortedEvents = [...allEvents].sort(
+        (a, b) =>
+            new Date(b.timestamp).getTime() -
+            new Date(a.timestamp).getTime()
+    );
+
     return (
         <Card>
             <CardHeader>
@@ -22,22 +60,11 @@ export function TodayTimeline({feedings}: TodayTimelineProps) {
 
             <CardContent>
                 <div>
-                    
-                    {events.map((feeding) => (
+
+                    {sortedEvents.map((event) => (
                         <TimelineItem
-                            key={feeding.id}
-                            event={{
-                                id: feeding.id,
-                                type: "feeding",
-                                timestamp: new Date(
-                                    feeding.timestamp
-                                ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                }),
-                                title: "Feeding",
-                                description: `Bottle · ${feeding.amountMl} ml`,
-                            }}
+                            key={event.id}
+                            event={event}
                         />
                     ))}
                 </div>

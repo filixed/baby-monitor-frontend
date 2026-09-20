@@ -4,6 +4,9 @@ import {useState} from "react";
 import {AddFeedingDialog} from "@/feauters/feeding/components/AddFeedingDialog.tsx";
 import type {Feeding} from "@/feauters/feeding/types.ts";
 import {useFeedingStore} from "@/feauters/feeding/store.ts";
+import {useDiaperStore} from "@/feauters/diaper/store.ts";
+import type {Diaper} from "@/feauters/diaper/types.ts";
+import {AddDiaperDialog} from "@/feauters/diaper/components/AddDiaperDialog.tsx";
 
 export function QuickActions() {
 
@@ -16,6 +19,17 @@ export function QuickActions() {
     function handleFeedingSubmit(feeding: Feeding) {
         addFeeding(feeding);
         setFeedingDialogOpen(false);
+    }
+
+    const [diaperDialogOpen, setDiaperDialogOpen] = useState(false);
+
+    const addDiaper = useDiaperStore(
+        (state) => state.AddDiaper
+    );
+
+    function handleDiaperSubmit(diaper: Diaper) {
+        addDiaper(diaper);
+        setDiaperDialogOpen(false);
     }
 
     return (
@@ -34,7 +48,8 @@ export function QuickActions() {
                         Feeding
                     </Button>
 
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2"
+                        onClick={() => setDiaperDialogOpen(true)}>
                         <Droplets/>
                         Diaper
                     </Button>
@@ -56,6 +71,8 @@ export function QuickActions() {
                 onOpenChange={setFeedingDialogOpen}
                 onSubmit={handleFeedingSubmit}
             />
+
+            <AddDiaperDialog open={diaperDialogOpen} onOpenChange={setDiaperDialogOpen} onSubmit={handleDiaperSubmit}/>
         </>
     );
 }
