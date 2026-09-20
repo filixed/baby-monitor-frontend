@@ -30,26 +30,29 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
             time: today.toISOString().slice(0, 5),
         }
     });
-    
+
     const feedingType = watch("type")
 
     const onSubmit = (data: FeedingFormData)=> {
-        const feeding: Feeding = {
-            id: crypto.randomUUID(),
-            type: data.type,
-            timestamp: `${data.date}T${data.time}:00`,
-        };
-        
-        if(data.type === "bottle") {
-            feeding.amountMl = data.amountMl;
-        }
-        
-        if(data.type === "breast") {
-            feeding.side = data.side;
-            feeding.durationMinutes = data.durationMinutes;
+
+        if (data.type === "bottle") {
+            onSubmitFeeding({
+                id: crypto.randomUUID(),
+                type: "bottle",
+                amountMl: data.amountMl,
+                timestamp: `${data.date}T${data.time}:00`,
+            });
+
+            return;
         }
 
-        onSubmitFeeding(feeding);
+        onSubmitFeeding({
+            id: crypto.randomUUID(),
+            type: "breast",
+            side: data.side,
+            durationMinutes: data.durationMinutes,
+            timestamp: `${data.date}T${data.time}:00`,
+        });
     }
 
     return (
@@ -102,7 +105,7 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
                             {errors.amountMl.message}
                         </p>
                     )}
-                </div>    
+                </div>
             )}
 
             {feedingType === "breast" && (
@@ -154,8 +157,8 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
                     </div>
                 </>
             )}
-            
-            
+
+
 
             <div className="flex flex-col gap-2">
                 <Label htmlFor="date">

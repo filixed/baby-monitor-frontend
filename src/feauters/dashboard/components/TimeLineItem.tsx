@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import type { TimeLineEvent } from "../types";
+import {formatTimestamp} from "@/feauters/dashboard/utils/formatTimestamp.ts";
 
 interface TimelineItemProps {
     event: TimeLineEvent;
@@ -24,7 +25,7 @@ export function TimelineItem({
     return (
         <div className="flex gap-4">
             <div className="flex w-14 shrink-0 justify-end pt-1 text-sm text-muted-foreground">
-                {event.timestamp}
+                {formatTimestamp(event.timestamp)}
             </div>
 
             <div className="relative flex">
