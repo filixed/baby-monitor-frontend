@@ -20,15 +20,25 @@ React 19 + TypeScript + Vite, Tailwind CSS v4 (via `@tailwindcss/vite`), shadcn/
 A baby-tracking ("parents") app. Currently frontend-only with no backend: data lives in in-memory zustand stores, so it is lost on reload.
 
 - `src/app/` — entry wiring. `router.tsx` defines the `createBrowserRouter` routes (`/` dashboard inside `AppShell` layout; `/feeding` outside it).
-- `src/feauters/` — feature folders (note the existing misspelling "feauters"; keep it for imports/consistency unless doing a rename). Each logged-activity feature (`feeding`, `diaper`) follows the same pattern:
+- `src/feauters/` — feature folders (note the existing misspelling "feauters"; keep it for imports/consistency unless doing a rename). Each logged-activity feature (`feeding`, `diaper`, `sleep`) follows the same pattern:
   - `schema.ts` — zod form schema
-  - `types.ts` — domain type
-  - `store.ts` — zustand store holding the list and an add action
-  - `components/Add<X>Dialog.tsx` wrapping `components/<X>From.tsx` (react-hook-form form; file names are misspelled `FeedingFrom`/`DiaperFrom`)
-- `src/feauters/dashboard/` — dashboard page and its components. `QuickActions.tsx` owns the open/close state of each Add dialog and passes the submitted entry to the matching feature store. `DashboardPage` still renders summary/timeline from `mockData.ts` rather than from the feature stores; wiring the stores into `DailySummary`/`TodayTimeline` is the pending integration point. Sleep and Weight quick actions are placeholders with no handlers.
+  - `types.ts` — domain type (timestamps stored as UTC ISO strings)
+  - `store.ts` — zustand store holding the list and an add action (`addFeeding`, `addDiaper`, `addSleep`)
+  - `components/Add<X>Dialog.tsx` wrapping a react-hook-form form (`FeedingFrom`/`DiaperFrom` are misspelled; `sleep` uses the correct `SleepForm.tsx`)
+  - Imports use the `@/feauters/<x>/...` alias with explicit `.ts`/`.tsx` extensions.
+- `src/lib/dateTime.ts` — shared time-zone helpers. **All forms with date/time inputs must use them:** `getLocalDateTimeDefaults(now?)` gives local `{date, time}` defaults for `<input type="date|time">` (compute it once per form render, not per field), and `toUtcIsoTimestamp(date, time)` converts the typed local values to a UTC ISO string for storage. Display converts back to local (e.g. `toLocaleTimeString`).
+- `src/feauters/sleep/` — sleep tracking. `Sleep` = `{id, description?, startTimestamp, endTimestamp}`. The form has separate start date/time and end date/time (so overnight sleep works); both default to now. `schema.ts` uses a zod `.refine` so end must be after start (error shown on `endTime`). Duration is derived, never stored.
+- `src/feauters/dashboard/` — dashboard page and its components.
+  - `QuickActions.tsx` owns the open/close state of each Add dialog (Feeding, Diaper, Sleep) and passes the submitted entry to the matching feature store. Weight is still a placeholder with no handler.
+  - `TodayTimeline.tsx` reads the feeding, diaper and sleep stores, maps each entry to a `TimeLineEvent` (`types.ts`), merges and sorts newest first, and renders `TimeLineItem` (icon per event type). Sleep events are placed at `startTimestamp`, with the duration as description. It does not yet filter to today. It is getting long; extracting per-feature mapper functions is the next reasonable refactor.
+  - `utils/` holds pure helpers: `formatTimestamp` (local HH:MM) and `formatDuration(start, end)` (e.g. `2 h 15 min`).
+  - `DashboardPage` still renders `DailySummary` from `mockData.ts`; wiring the stores into it (including the sleep total) is the pending integration point.
 - `src/stores/appStore.ts` — global app state (`selectedBabyId`).
 
-Inconsistency to be aware of: the diaper store action is named `AddDiaper` (capitalized) while the feeding store uses `addFeeding`.
+## Known issues
+
+- `npx tsc -b` (and so `npm run build`) fails with TS5101: `baseUrl` is deprecated in `tsconfig.app.json`. Type-check meanwhile with `npx tsc -p tsconfig.app.json --noEmit --ignoreDeprecations 6.0`.
+- Python is not installed in the dev environment; use node or the Edit tool for scripted edits.
 
 ## Coding principles
 
@@ -50,3 +60,24 @@ This is a project for learning frontend development.
 - Skip it for trivial edits (typos, renames, small fixes).
 - Be honest: if a choice is convention or personal preference rather than objectively better, say so. If you're unsure, say so. Don't call something "best practice" or "industry standard" without a concrete reason, and don't invent sources.
 - If my request would lead to a worse design, point it out briefly before doing it.
+
+# Git Rules
+- NEVER execute, modify, or create a Git commit, branch, or push without presenting the summary to the user first.
+- Always ask for explicit confirmation before running any git command.
+- Do not attempt to bypass terminal restrictions via secondary scripts.
+
+## Git Commit Guidelines
+- Always use the **Conventional Commits** specification for all commit messages.
+- Format: `<type>(<scope>): <description>` (scope is optional).
+- Allowed types:
+  - `feat`: A new feature
+  - `fix`: A bug fix
+  - `docs`: Documentation changes
+  - `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+  - `refactor`: A code change that neither fixes a bug nor adds a feature
+  - `perf`: A code change that improves performance
+  - `test`: Adding missing tests or correcting existing tests
+  - `chore`: Changes to the build process or auxiliary tools and libraries
+- Use lowercase for the description and write it in the imperative mood (e.g., "add logging" instead of "added logging").
+
+

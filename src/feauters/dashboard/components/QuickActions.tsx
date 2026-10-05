@@ -7,6 +7,9 @@ import {useFeedingStore} from "@/feauters/feeding/store.ts";
 import {useDiaperStore} from "@/feauters/diaper/store.ts";
 import type {Diaper} from "@/feauters/diaper/types.ts";
 import {AddDiaperDialog} from "@/feauters/diaper/components/AddDiaperDialog.tsx";
+import {useSleepStore} from "@/feauters/sleep/store.ts";
+import type {Sleep} from "@/feauters/sleep/types.ts";
+import {AddSleepDialog} from "@/feauters/sleep/components/AddSleepDialog.tsx";
 
 export function QuickActions() {
 
@@ -32,6 +35,17 @@ export function QuickActions() {
         setDiaperDialogOpen(false);
     }
 
+    const [sleepDialogOpen, setSleepDialogOpen] = useState(false);
+
+    const addSleep = useSleepStore(
+        (state) => state.addSleep
+    );
+
+    function handleSleepSubmit(sleep: Sleep) {
+        addSleep(sleep);
+        setSleepDialogOpen(false);
+    }
+
     return (
         <>
             <section className="space-y-3">
@@ -54,7 +68,8 @@ export function QuickActions() {
                         Diaper
                     </Button>
 
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2"
+                        onClick={() => setSleepDialogOpen(true)}>
                         <Moon/>
                         Sleep
                     </Button>
@@ -73,6 +88,8 @@ export function QuickActions() {
             />
 
             <AddDiaperDialog open={diaperDialogOpen} onOpenChange={setDiaperDialogOpen} onSubmit={handleDiaperSubmit}/>
+
+            <AddSleepDialog open={sleepDialogOpen} onOpenChange={setSleepDialogOpen} onSubmit={handleSleepSubmit}/>
         </>
     );
 }
