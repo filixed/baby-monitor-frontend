@@ -10,6 +10,9 @@ import {AddDiaperDialog} from "@/feauters/diaper/components/AddDiaperDialog.tsx"
 import {useSleepStore} from "@/feauters/sleep/store.ts";
 import type {Sleep} from "@/feauters/sleep/types.ts";
 import {AddSleepDialog} from "@/feauters/sleep/components/AddSleepDialog.tsx";
+import {useWeightStore} from "@/feauters/weight/store.ts";
+import type {Weight} from "@/feauters/weight/types.ts";
+import {AddWeightDialog} from "@/feauters/weight/components/AddWeightDialog.tsx";
 
 export function QuickActions() {
 
@@ -46,6 +49,17 @@ export function QuickActions() {
         setSleepDialogOpen(false);
     }
 
+    const [weightDialogOpen, setWeightDialogOpen] = useState(false);
+
+    const addWeight = useWeightStore(
+        (state) => state.addWeight
+    );
+
+    function handleWeightSubmit(weight: Weight) {
+        addWeight(weight);
+        setWeightDialogOpen(false);
+    }
+
     return (
         <>
             <section className="space-y-3">
@@ -74,7 +88,8 @@ export function QuickActions() {
                         Sleep
                     </Button>
 
-                    <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Button variant="outline" className="h-20 flex-col gap-2"
+                        onClick={() => setWeightDialogOpen(true)}>
                         <Scale/>
                         Weight
                     </Button>
@@ -90,6 +105,8 @@ export function QuickActions() {
             <AddDiaperDialog open={diaperDialogOpen} onOpenChange={setDiaperDialogOpen} onSubmit={handleDiaperSubmit}/>
 
             <AddSleepDialog open={sleepDialogOpen} onOpenChange={setSleepDialogOpen} onSubmit={handleSleepSubmit}/>
+
+            <AddWeightDialog open={weightDialogOpen} onOpenChange={setWeightDialogOpen} onSubmit={handleWeightSubmit}/>
         </>
     );
 }

@@ -20,19 +20,20 @@ React 19 + TypeScript + Vite, Tailwind CSS v4 (via `@tailwindcss/vite`), shadcn/
 A baby-tracking ("parents") app. Currently frontend-only with no backend: data lives in in-memory zustand stores, so it is lost on reload.
 
 - `src/app/` — entry wiring. `router.tsx` defines the `createBrowserRouter` routes (`/` dashboard inside `AppShell` layout; `/feeding` outside it).
-- `src/feauters/` — feature folders (note the existing misspelling "feauters"; keep it for imports/consistency unless doing a rename). Each logged-activity feature (`feeding`, `diaper`, `sleep`) follows the same pattern:
+- `src/feauters/` — feature folders (note the existing misspelling "feauters"; keep it for imports/consistency unless doing a rename). Each logged-activity feature (`feeding`, `diaper`, `sleep`, `weight`) follows the same pattern:
   - `schema.ts` — zod form schema
   - `types.ts` — domain type (timestamps stored as UTC ISO strings)
-  - `store.ts` — zustand store holding the list and an add action (`addFeeding`, `addDiaper`, `addSleep`)
-  - `components/Add<X>Dialog.tsx` wrapping a react-hook-form form (`FeedingFrom`/`DiaperFrom` are misspelled; `sleep` uses the correct `SleepForm.tsx`)
+  - `store.ts` — zustand store holding the list and an add action (`addFeeding`, `addDiaper`, `addSleep`, `addWeight`)
+  - `components/Add<X>Dialog.tsx` wrapping a react-hook-form form (`FeedingFrom`/`DiaperFrom` are misspelled; `sleep` and `weight` use the correct `SleepForm.tsx` / `WeightForm.tsx`)
   - Imports use the `@/feauters/<x>/...` alias with explicit `.ts`/`.tsx` extensions.
 - `src/lib/dateTime.ts` — shared time-zone helpers. **All forms with date/time inputs must use them:** `getLocalDateTimeDefaults(now?)` gives local `{date, time}` defaults for `<input type="date|time">` (compute it once per form render, not per field), and `toUtcIsoTimestamp(date, time)` converts the typed local values to a UTC ISO string for storage. Display converts back to local (e.g. `toLocaleTimeString`).
 - `src/feauters/sleep/` — sleep tracking. `Sleep` = `{id, description?, startTimestamp, endTimestamp}`. The form has separate start date/time and end date/time (so overnight sleep works); both default to now. `schema.ts` uses a zod `.refine` so end must be after start (error shown on `endTime`). Duration is derived, never stored.
+- `src/feauters/weight/` — weight tracking. `Weight` = `{id, weightKg, timestamp}`. The form has only a kg input (`step="0.01"`, registered with `valueAsNumber: true` so `schema.ts` can use `z.number()` positive) and a date input defaulting to today. There is no time input: `WeightForm` combines the chosen date with the current local time of day on submit (via `getLocalDateTimeDefaults().time` + `toUtcIsoTimestamp`), because the timeline sorts by timestamp.
 - `src/feauters/dashboard/` — dashboard page and its components.
-  - `QuickActions.tsx` owns the open/close state of each Add dialog (Feeding, Diaper, Sleep) and passes the submitted entry to the matching feature store. Weight is still a placeholder with no handler.
-  - `TodayTimeline.tsx` reads the feeding, diaper and sleep stores, maps each entry to a `TimeLineEvent` (`types.ts`), merges and sorts newest first, and renders `TimeLineItem` (icon per event type). Sleep events are placed at `startTimestamp`, with the duration as description. It does not yet filter to today. It is getting long; extracting per-feature mapper functions is the next reasonable refactor.
-  - `utils/` holds pure helpers: `formatTimestamp` (local HH:MM) and `formatDuration(start, end)` (e.g. `2 h 15 min`).
-  - `DashboardPage` still renders `DailySummary` from `mockData.ts`; wiring the stores into it (including the sleep total) is the pending integration point.
+  - `QuickActions.tsx` owns the open/close state of each Add dialog (Feeding, Diaper, Sleep, Weight) and passes the submitted entry to the matching feature store.
+  - `TodayTimeline.tsx` only renders: it calls `hooks/useTimelineEvents.ts`, which reads the feeding, diaper, sleep and weight stores, maps each entry to a `TimeLineEvent` (`types.ts`) with the pure mappers, merges and sorts newest first (memoized), and `TimeLineItem` renders each event (icon per event type). Sleep events are placed at `startTimestamp`, with the duration as description; weight events show `<n> kg`. It does not yet filter to today (the hook is the place to add that).
+  - `utils/` holds pure helpers: `formatTimestamp` (local HH:MM), `formatDuration(start, end)` (e.g. `2 h 15 min`), and `timelineMappers.ts` (`feedingToEvent`, `diaperToEvent`, `sleepToEvent`, `weightToEvent`, `sortEventsNewestFirst`). Mappers live in the dashboard, not in the features, so features stay unaware of the timeline.
+  - `DashboardPage` still renders `DailySummary` from `mockData.ts`; wiring the stores into it (including the sleep total and the latest weight) is the pending integration point.
 - `src/stores/appStore.ts` — global app state (`selectedBabyId`).
 
 ## Known issues
