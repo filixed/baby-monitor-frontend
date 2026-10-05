@@ -1,6 +1,6 @@
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import type {Diaper} from "@/feauters/diaper/types.ts";
-import {DiaperForm} from "@/feauters/diaper/components/DiaperFrom.tsx";
+import {DiaperForm} from "@/feauters/diaper/components/DiaperForm.tsx";
 
 interface AddDiaperDialogProps {
     open: boolean;

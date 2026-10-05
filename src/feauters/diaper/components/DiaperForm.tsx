@@ -6,6 +6,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
+import {getLocalDateTimeDefaults, toUtcIsoTimestamp} from "@/lib/dateTime.ts";
 
 interface DiaperFromProps {
     onSubmitDiaper: (diaper: Diaper) => void;
@@ -14,8 +15,6 @@ interface DiaperFromProps {
 type DiaperFormData = z.infer<typeof diaperFormSchema>;
 
 export function DiaperForm({ onSubmitDiaper, } : DiaperFromProps){
-    const today = new Date();
-
     const {
         register,
         handleSubmit,
@@ -25,8 +24,7 @@ export function DiaperForm({ onSubmitDiaper, } : DiaperFromProps){
         defaultValues: {
             type: "wet",
             description: undefined,
-            date: today.toISOString().split("T")[0],
-            time: today.toISOString().slice(0, 5),
+            ...getLocalDateTimeDefaults(),
         }
     });
 
@@ -35,7 +33,7 @@ export function DiaperForm({ onSubmitDiaper, } : DiaperFromProps){
             id: crypto.randomUUID(),
             type: data.type,
             description: data.description,
-            timestamp: `${data.date}T${data.time}:00`,
+            timestamp: toUtcIsoTimestamp(data.date, data.time),
         })
     }
 
