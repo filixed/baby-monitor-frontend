@@ -4,6 +4,8 @@ import { TimelineItem } from "./TimeLineItem";
 import {useFeedingStore} from "@/feauters/feeding/store.ts";
 import type {TimeLineEvent} from "@/feauters/dashboard/types.ts";
 import {useDiaperStore} from "@/feauters/diaper/store.ts";
+import {useSleepStore} from "@/feauters/sleep/store.ts";
+import {formatDuration} from "@/feauters/dashboard/utils/formatDuration.ts";
 
 
 export function TodayTimeline() {
@@ -42,9 +44,24 @@ export function TodayTimeline() {
         };
     });
 
+    const sleeps = useSleepStore((state) => state.sleeps);
+
+    const sleepEvents: TimeLineEvent[] = sleeps.map((sleep) => {
+        const duration = formatDuration(sleep.startTimestamp, sleep.endTimestamp);
+
+        return {
+            id: sleep.id,
+            type: "sleep",
+            timestamp: sleep.startTimestamp,
+            title: "Sleep",
+            description: sleep.description ? `${duration} · ${sleep.description}` : duration,
+        };
+    });
+
     const allEvents = [
         ...feedingEvents,
-        ...diapersEvents];
+        ...diapersEvents,
+        ...sleepEvents];
 
     const sortedEvents = [...allEvents].sort(
         (a, b) =>
