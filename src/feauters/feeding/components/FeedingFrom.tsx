@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver} from "@hookform/resolvers/zod";
 import { feedingFormSchema} from "@/feauters/feeding/schema.ts";
 import {z} from "zod";
+import {getLocalDateTimeDefaults, toUtcIsoTimestamp} from "@/lib/dateTime.ts";
 
 interface FeedingFormProps {
     onSubmitFeeding: (feeding: Feeding) => void;
@@ -14,8 +15,6 @@ interface FeedingFormProps {
 type FeedingFormData = z.infer<typeof feedingFormSchema>;
 
 export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
-    const today = new Date();
-
     const {
         register,
         handleSubmit,
@@ -26,8 +25,7 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
         defaultValues: {
             type: "bottle",
             amountMl: undefined,
-            date: today.toISOString().split("T")[0],
-            time: today.toISOString().slice(0, 5),
+            ...getLocalDateTimeDefaults(),
         }
     });
 
@@ -40,7 +38,7 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
                 id: crypto.randomUUID(),
                 type: "bottle",
                 amountMl: data.amountMl,
-                timestamp: `${data.date}T${data.time}:00`,
+                timestamp: toUtcIsoTimestamp(data.date, data.time),
             });
 
             return;
@@ -51,7 +49,7 @@ export function FeedingForm({ onSubmitFeeding, }: FeedingFormProps) {
             type: "breast",
             side: data.side,
             durationMinutes: data.durationMinutes,
-            timestamp: `${data.date}T${data.time}:00`,
+            timestamp: toUtcIsoTimestamp(data.date, data.time),
         });
     }
 

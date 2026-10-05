@@ -24,7 +24,7 @@ export function QuickActions() {
     const [diaperDialogOpen, setDiaperDialogOpen] = useState(false);
 
     const addDiaper = useDiaperStore(
-        (state) => state.AddDiaper
+        (state) => state.addDiaper
     );
 
     function handleDiaperSubmit(diaper: Diaper) {
