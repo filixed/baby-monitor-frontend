@@ -8,8 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run build` — `tsc -b && vite build` (type-checks first)
 - `npm run lint` — ESLint
 - `npm run preview` — preview the production build
+- `npm test` — Vitest in watch mode (`npx vitest run` for a single run)
 
-Vitest, jsdom and Testing Library are installed as devDependencies, but there is no `test` script, no vitest config and no test files yet. To run tests you will need to add them (`npx vitest` works once a config exists).
+Testing: Vitest is configured in the `test` key of `vite.config.ts` (imports `defineConfig` from `vitest/config`; environment `jsdom`; picks up `src/**/*.test.{ts,tsx}`; no globals, so import `describe`/`it`/`expect` from `vitest`). Tests are co-located with the code (e.g. `dashboard/utils/formatDuration.test.ts`, `timelineMappers.test.ts`) and currently cover only pure helpers; use them as the template for new tests. Testing Library is installed, but there is no `setupFiles` for `@testing-library/jest-dom` yet — add it when the first component test needs it.
 
 ## Stack
 
@@ -38,7 +39,6 @@ A baby-tracking ("parents") app. Currently frontend-only with no backend: data l
 
 ## Known issues
 
-- `npx tsc -b` (and so `npm run build`) fails with TS5101: `baseUrl` is deprecated in `tsconfig.app.json`. Type-check meanwhile with `npx tsc -p tsconfig.app.json --noEmit --ignoreDeprecations 6.0`.
 - Python is not installed in the dev environment; use node or the Edit tool for scripted edits.
 
 ## Coding principles
