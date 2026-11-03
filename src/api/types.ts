@@ -53,6 +53,9 @@ export interface WeightData {
 }
 
 export interface DashboardResponse {
+  id: string | null;
+  name: string | null;
+  dateOfBirth: string;
   feedings: number;
   diapers: number;
   sleep: number;
