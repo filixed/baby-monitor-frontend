@@ -1,4 +1,4 @@
-import {Outlet} from "react-router-dom";
+import {Link, Outlet} from "react-router-dom";
 
 export function AppShell() {
     return (
@@ -6,7 +6,9 @@ export function AppShell() {
             <header className="border-b bg-white">
                 <div className="mx-auto flex h-16 max-w-7xl items-center px-4">
                     <h1 className="text-xl font-semibold">
-                        🍼 Baby Monitor
+                        <Link to="/babies">
+                            🍼 Baby Monitor
+                        </Link>
                     </h1>
                 </div>
             </header>
