@@ -17,7 +17,6 @@ export const router = createBrowserRouter([
                 element: <BabiesPage />
             },
             {
-                // Still the old, baby-agnostic dashboard until Phase 2 makes it per-baby.
                 path: "/babies/:babyId",
                 element: <DashboardPage />
             }
